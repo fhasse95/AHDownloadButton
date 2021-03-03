@@ -49,6 +49,7 @@ public final class AHDownloadButton: UIView {
     public var startDownloadButtonTitle: String = "GET" {
         didSet {
             startDownloadButton.setTitle(startDownloadButtonTitle, for: .normal)
+            startDownloadButtonTitleWidth = startDownloadButton.titleWidth
         }
     }
     
@@ -153,6 +154,7 @@ public final class AHDownloadButton: UIView {
     public var downloadedButtonTitle: String = "OPEN" {
         didSet {
             downloadedButton.setTitle(downloadedButtonTitle, for: .normal)
+            downloadedButtonTitleWidth = downloadedButton.titleWidth
         }
     }
     
@@ -245,8 +247,12 @@ public final class AHDownloadButton: UIView {
         button.addTarget(self, action: #selector(currentButtonTapped), for: .touchUpInside)
         return button
     }()
-
-    let contentHorizontalAlignment: HorizontalAlignment
+    
+    public var contentHorizontalAlignment: HorizontalAlignment {
+        didSet {
+            self.commonInit()
+        }
+    }
 
     // MARK: Animation
     
@@ -288,22 +294,21 @@ public final class AHDownloadButton: UIView {
     public init(alignment: HorizontalAlignment) {
         contentHorizontalAlignment = alignment
         super.init(frame: .zero)
-        commonInit()
     }
 
     public override init(frame: CGRect) {
         contentHorizontalAlignment = .center
         super.init(frame: frame)
-        commonInit()
     }
     
     public required init?(coder aDecoder: NSCoder) {
         contentHorizontalAlignment = .center
         super.init(coder: aDecoder)
-        commonInit()
     }
     
     private func commonInit() {
+        subviews.forEach({ $0.removeFromSuperview() })
+        
         addSubview(startDownloadButton)
         setUpStartDownloadButtonProperties()
         setUpStartDownloadButtonConstraints()
@@ -364,6 +369,8 @@ public final class AHDownloadButton: UIView {
     // MARK: Constraints setup
     
     private func setUpStartDownloadButtonConstraints() {
+        self.clearConstraints(view: startDownloadButton)
+        
         let topConstraint = startDownloadButton.constraint(attribute: .top, toItem: self, toAttribute: .top)
         
         let bottomConstraint = startDownloadButton.constraint(attribute: .bottom, toItem: self, toAttribute: .bottom)
@@ -376,6 +383,8 @@ public final class AHDownloadButton: UIView {
     }
     
     private func setUpPendingButtonConstraints() {
+        self.clearConstraints(view: pendingCircleView)
+        
         let horizontalPositionConstraint = pendingCircleView.constraint(attribute: horizontalAlignmentAttribute, toItem: self, toAttribute: horizontalAlignmentAttribute)
         let heightConstraint = pendingCircleView.constraint(attribute: .height, relation: .equal, toItem: pendingCircleView, toAttribute: .width)
         let verticalPositionConstraint = pendingCircleView.constraint(attribute: .centerY, toItem: self, toAttribute: .centerY)
@@ -385,6 +394,8 @@ public final class AHDownloadButton: UIView {
     }
     
     private func setUpDownloadingButtonConstraints() {
+        self.clearConstraints(view: downloadingButton)
+        
         let horizontalPositionConstraint = downloadingButton.constraint(attribute: horizontalAlignmentAttribute, toItem: self, toAttribute: horizontalAlignmentAttribute)
         let verticalPositionConstraint = downloadingButton.constraint(attribute: .centerY, toItem: self, toAttribute: .centerY)
 
@@ -396,6 +407,8 @@ public final class AHDownloadButton: UIView {
     }
     
     private func setUpDownloadedButtonConstraints() {
+        self.clearConstraints(view: downloadedButton)
+        
         let topConstraint = downloadedButton.constraint(attribute: .top, toItem: self, toAttribute: .top)
         let bottomConstraint = downloadedButton.constraint(attribute: .bottom, toItem: self, toAttribute: .bottom)
         let horizontalPositionConstraint = downloadedButton.constraint(attribute: horizontalAlignmentAttribute, toItem: self, toAttribute: horizontalAlignmentAttribute)
@@ -404,6 +417,13 @@ public final class AHDownloadButton: UIView {
         downloadedButtonWidthConstraint = downloadedButton.constraint(attribute: .width, constant: 50)
 
         NSLayoutConstraint.activate([topConstraint, bottomConstraint, horizontalPositionConstraint, downloadedButtonWidthConstraint])
+    }
+    
+    private func clearConstraints(view: UIView) {
+        for subview in view.subviews {
+            self.clearConstraints(view: subview)
+        }
+        self.removeConstraints(view.constraints)
     }
     
     // MARK: Method overrides

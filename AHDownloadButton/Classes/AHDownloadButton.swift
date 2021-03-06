@@ -196,9 +196,7 @@ public final class AHDownloadButton: UIView {
         didSet {
             delegate?.downloadButton(self, stateChanged: state)
             downloadButtonStateChangedAction?(self, state)
-            animationQueue.async { [currentState = state] in
-                self.animationDispatchGroup.enter()
-                
+            DispatchQueue.main.async { [currentState = state] in
                 var delay: TimeInterval = 0
                 if oldValue == .downloading && currentState == .downloaded && self.downloadingButton.progress == 1 {
                     delay = self.downloadingButton.progressCircleView.progressAnimationDuration
@@ -207,12 +205,11 @@ public final class AHDownloadButton: UIView {
                 DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                     self.animateTransition(from: oldValue, to: currentState)
                 }
-                self.animationDispatchGroup.wait()
             }
         }
     }
     
-    public var transitionAnimationDuration: TimeInterval = 0.1
+    public var transitionAnimationDuration: TimeInterval = 0.15
     
     /// Callbacks
     
@@ -253,11 +250,6 @@ public final class AHDownloadButton: UIView {
             self.commonInit()
         }
     }
-
-    // MARK: Animation
-    
-    let animationDispatchGroup = DispatchGroup()
-    let animationQueue = DispatchQueue(label: "com.amerhukic.animation")
     
     // MARK: Constraints
     
@@ -431,6 +423,7 @@ public final class AHDownloadButton: UIView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         let width = min(frame.width, frame.height)
+        pendingCircleView.startSpinning()
         pendingViewWidthConstraint.constant = width
         downloadingButtonWidthConstraint.constant = width
         

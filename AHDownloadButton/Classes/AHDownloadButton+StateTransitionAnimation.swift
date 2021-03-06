@@ -15,7 +15,6 @@ extension AHDownloadButton {
         let completion: (Bool) -> Void = { completed in
             guard completed else { return }
             self.resetStateViews(except: newState)
-            self.animationDispatchGroup.leave()
         }
                 
         switch (oldState, newState) {
@@ -128,7 +127,6 @@ extension AHDownloadButton {
             downloadedButton.alpha = 1
         }
         resetStateViews(except: newState)
-        animationDispatchGroup.leave()
     }
 
     private func resetStateViews(except state: State) {
